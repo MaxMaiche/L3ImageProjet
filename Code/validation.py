@@ -27,7 +27,8 @@ def getLabeling(nomImage: str):
     print(data)
     return data['imageHeight'], data['imageWidth'], board, lignes, schema
 
-def getpixelSegment(point1,point2):
+
+def getpixelSegment(point1, point2):
     x1 = point1[0]
     x2 = point2[0]
     y1 = point1[1]
@@ -58,17 +59,27 @@ def getpixelSegment(point1,point2):
 
     return pixelinSegment
 
-def castRay(image, point):
+
+def castRay(image, point, max_x):
+
     nbInter = 0
-    for i in range(0, image.shape[0]):
-        for j in range(0, image.shape[1]):
-            if image[i, j] == 1:
-                nbInter += 1
-    return nbInter
+
+    x, y = point
+    while x <= max_x:
+
+        if image[x, y] == 1:
+            nbInter += 1
+        x += 1
+
+    if nbInter % 2 == 1:
+        return 255
+    else:
+        return 0
+
 
 def pixelinpolygones(height, width, polygone):
     image = np.zeros((height, width))
-    #find max and min
+    # find max and min
     max_x = 0
     max_y = 0
     min_x = width
@@ -89,19 +100,19 @@ def pixelinpolygones(height, width, polygone):
 
     contours = []
     for i in range(1, len(polygone)):
-        contours += getpixelSegment(polygone[i-1], polygone[i])
+        contours += getpixelSegment(polygone[i - 1], polygone[i])
 
-    contours += getpixelSegment(polygone[0], polygone[len(polygone)-1])
+    contours += getpixelSegment(polygone[0], polygone[len(polygone) - 1])
 
     for p in contours:
-        image[p[0], p[1]] = 1
+        image[p[0], p[1]] = 255
 
     for i in range(int(min_x), int(max_x)):
         for j in range(int(min_y), int(max_y)):
-
+            if image[i, j] == 0:
+                image[i, j] = castRay(image, (i, j), max_x)
 
     return image
-
 
 
 height, width, b, l, s = getLabeling('0')
@@ -109,14 +120,10 @@ image = pixelinpolygones(height, width, b[0])
 plt.imshow(image, cmap='gray')
 plt.show()
 
-
 print(len(b))
 print(len(l))
 print(len(s))
 print(b)
-
-
-
 
 
 def getNbPixelBlanc(imgBin):
@@ -127,5 +134,5 @@ def getNbPixelBlanc(imgBin):
                 nbPixelB += 1
     return nbPixelB
 
-#fait un truc pour faire l'union des deux et l'inter des deux images binaires
-#entre json et le png/jpg ?
+# fait un truc pour faire l'union des deux et l'inter des deux images binaires
+# entre json et le png/jpg ?
