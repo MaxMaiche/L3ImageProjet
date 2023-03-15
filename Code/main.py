@@ -40,6 +40,9 @@ print(imageConvolution)
 
 imageConvolution = np.array([[abs(imageConvolution[i, j]) for j in range(imageConvolution.shape[1])] for i in range(imageConvolution.shape[0])])
 
+mi, ma = np.min(imageConvolution), np.max(imageConvolution)
+
+imageConvolution = np.array([[int(255 * (imageConvolution[i, j] - mi) / (ma - mi)) for j in range(imageConvolution.shape[1])] for i in range(imageConvolution.shape[0])])
 
 plt.imshow(imageGrayscale, cmap='gray', vmin=0, vmax=255)
 plt.show()
