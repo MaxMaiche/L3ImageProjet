@@ -6,9 +6,11 @@ import json
 from PIL import Image
 from time import time
 from random import shuffle, randint
+import os
+
 def getLabeling(nomImage: str):
     f = open('../Ressources/labeling/' + nomImage + '.json')
-    #f = open('../Ressources/testsimple/petittest.json')
+    # f = open('../Ressources/testsimple/petittest.json')
     data = json.load(f)
     shapes = data['shapes']
 
@@ -62,31 +64,31 @@ def getpixelSegment(point1, point2):
 
 def getNeighbours(image, point):
     neighbours = []
-    x=point[0]
-    y=point[1]
+    x = point[0]
+    y = point[1]
 
     try:
-        if image[x-1, y] == 0:
-            neighbours.append((x-1, y))
+        if image[x - 1, y] == 0:
+            neighbours.append((x - 1, y))
     except:
         pass
     try:
-        if image[x+1, y] == 0:
-            neighbours.append((x+1, y))
+        if image[x + 1, y] == 0:
+            neighbours.append((x + 1, y))
     except:
         pass
     try:
-        if image[x, y-1] == 0:
-            neighbours.append((x, y-1))
+        if image[x, y - 1] == 0:
+            neighbours.append((x, y - 1))
     except:
         pass
     try:
-        if image[x, y+1] == 0:
-            neighbours.append((x, y+1))
+        if image[x, y + 1] == 0:
+            neighbours.append((x, y + 1))
     except:
         pass
 
-    #shuffle(neighbours)
+    # shuffle(neighbours)
     return neighbours
 
 
@@ -120,98 +122,114 @@ def pixelinpolygones(height, width, polygone):
     for p in contours:
         image[p[1], p[0]] = 255
 
-    #mean of the contour
-    mean_x = (max_x+min_x)/2
-    mean_y = (max_y+min_y)/2
-    print(mean_x, mean_y)
 
-    pixelQueue = [(int(mean_y), int(mean_x), True, True)]
-    cpt = 0
-
-    try:
-        while len(pixelQueue) > 0:
-            cpt += 1
-            #if cpt % 1000 == 0:
-                #print(len(pixelQueue), 'pixels left')
-
-            x, y, hory, verti = pixelQueue.pop(0)
-            pixel = (x, y)
-            if hory:
-                pixelQueue.append(castRayTop(image, pixel))
-                pixelQueue.append(castRayBottom(image, pixel))
-            if verti:
-                pixelQueue.append(castRayLeft(image, pixel))
-                pixelQueue.append(castRayRight(image, pixel))
-
-    except KeyboardInterrupt:
-        pass
 
     # try:
     #     for x in range(max_y-1, min_y-1, -1):
-    #         print(((x-min_y)/(max_y-min_y)*100), '%')
+    #         cpt += 1
+    #         if cpt % 100 == 0:
+    #             print(((x - min_y) / (max_y - min_y) * 100), '%   x:', x, 'cpt:', cpt)
     #         for y in range(min_x, max_x):
     #             if image[x, y] == 0:
     #                 image[x, y] = castRay(image, (x, y), max_x)
     #
     # except KeyboardInterrupt:
     #     pass
-    #
-    # for x in range(min_x, max_x):
+
+    # for x in range(min_y, max_y):
     #     for y in range(min_x, max_x):
     #         if image[x, y] == 128:
-    #             image[x, y] = 255
+    #             if getNeighbours(image, (x, y)):
+    #                 image[x, y] = 0
+    #             else:
+    #                 image[x, y] = 255
+
+    points = []
+
+    y = min_x
+    for x in range(min_y, max_y):
+        points.extend(castRayRight(image, (x, y), max_x))
+
+    y = max_x
+    for x in range(min_y, max_y):
+        points.extend(castRayLeft(image, (x, y), min_x))
+
+    x = max_y
+    for y in range(min_x, max_x):
+        points.extend(castRayUp(image, (x, y), min_y))
+
+    x = min_y
+    for y in range(min_x, max_x):
+        points.extend(castRayDown(image, (x, y), max_x))
+
+    for p in points:
+        image[p[0], p[1]] = 128
+
+    for x in range(min_y, max_y + 1):
+        for y in range(min_x, max_x + 1):
+            if image[x, y] == 128:
+                image[x, y] = 0
+            elif image[x, y] == 0:
+                image[x, y] = 254
+
+    for x in range(min_y, max_y + 1):
+        for y in range(min_x, max_x + 1):
+            if image[x, y] == 254:
+                if getNeighbours(image, (x, y)):
+                    image[x, y] = 0
+
     return image
 
-def castRayTop(image, point):
-    x, y = point
-    x_init = x
 
-    try:
-        while image[x-1, y] != 255:
-            x -= 1
-            image[x, y] = 128
-    except:
-        pass
-    x += (x_init-x) // 2
-    return x, y, False, True
-
-def castRayBottom(image, point):
+def castRayRight(image, point, max_x):
     x, y = point
-    x_init = x
-    try:
-        while image[x+1, y] != 255:
-            x += 1
-            image[x, y] = 128
-    except:
-        pass
-    x +=( x_init-x) // 2
-    return x, y, False, True
+    points = []
+    while x < max_x:
+        if image[x, y] == 255:
+            return points
+        points.append((x, y))
+        y += 1
 
-def castRayLeft(image, point):
-    x, y = point
-    y_init = y
-    try:
-        while image[x, y-1] != 255:
-            y -= 1
-            image[x, y] = 128
-    except:
-        pass
-    y += (y_init-y) // 2
-    return x, y, True, False
+    return points
 
-def castRayRight(image, point):
+
+def castRayLeft(image, point, min_x):
     x, y = point
-    y_init = y
-    try:
-        while image[x, y+1] != 255:
-            y += 1
-            image[x, y] = 128
-    except:
-        pass
-    y += (y_init-y) // 2
-    return x, y, True, False
+    points = []
+    while x > min_x:
+        if image[x, y] == 255:
+            return points
+        points.append((x, y))
+        y -= 1
+
+    return points
+
+
+def castRayUp(image, point, min_y):
+    x, y = point
+    points = []
+    while y > min_y:
+        if image[x, y] == 255:
+            return points
+        points.append((x, y))
+        x -= 1
+
+    return points
+
+
+def castRayDown(image, point, max_y):
+    x, y = point
+    points = []
+    while y < max_y:
+        if image[x, y] == 255:
+            return points
+        points.append((x, y))
+        x += 1
+
+    return points
+
+
 def castRay(image, point, max_x):
-
     nbInter = 0
     x, y = point
     while x < max_x:
@@ -220,7 +238,7 @@ def castRay(image, point, max_x):
             while image[x, y] == 255 and x < max_x:
                 x += 1
 
-        if x < max_x-1 and image[x+1, y] == 128:
+        if x < max_x - 1 and image[x + 1, y] == 128:
             return 128
 
         x += 1
@@ -230,17 +248,82 @@ def castRay(image, point, max_x):
     else:
         return 0
 
+def unionBinaryImage(image1, image2, height, width):
+    for x in range(height):
+        for y in range(width):
+            if image1[x, y] >= 128 or image2[x, y] >= 128:
+                image1[x, y] = 255
+            else:
+                image1[x, y] = 0
 
-height, width, b, l, s = getLabeling('33')
-timeStart = time()
-image = pixelinpolygones(height, width, b[1])
-timeEnd = time()
-print('time: ', timeEnd - timeStart)
-im = Image.fromarray(image)
-im = im.convert('RGB')
-im.save("resultat_Validation.png")
+    return image1
 
-print(len(b))
-print(len(l))
-print(len(s))
+def main():
+    folder_path = '../Ressources/labeling'
+    allowed_extensions = '.json'
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if filename.endswith(allowed_extensions):
+            board = []
+            lignes = []
+            schema = []
 
+            print(filename)
+            filename = filename.split('.')[0]
+
+            height, width, b, l, s = getLabeling(filename)
+            print(height, width)
+            timeStart = time()
+            for i in range(len(b)):
+                board.append(pixelinpolygones(height, width, b[i]))
+
+            for i in range(len(l)):
+                lignes.append(pixelinpolygones(height, width, l[i]))
+
+            for i in range(len(s)):
+                schema.append(pixelinpolygones(height, width, s[i]))
+
+
+            if len(board) == 0:
+                board.append(np.zeros((height, width), dtype=np.uint8))
+            else:
+                boardImage = board[0]
+                for i in range(1, len(board)):
+                    boardImage = unionBinaryImage(boardImage, board[i], height, width)
+
+
+            if len(lignes) == 0:
+                lignes.append(np.zeros((height, width), dtype=np.uint8))
+            else:
+                lignesImage = lignes[0]
+                for i in range(1, len(lignes)):
+                    lignesImage = unionBinaryImage(lignesImage, lignes[i], height, width)
+
+            if len(schema) == 0:
+                schema.append(np.zeros((height, width), dtype=np.uint8))
+            else:
+                schemaImage = schema[0]
+                for i in range(1, len(schema)):
+                    schemaImage = unionBinaryImage(schemaImage, schema[i], height, width)
+
+            timeEnd = time()
+            print('time: ', timeEnd - timeStart)
+            if not os.path.exists("../Validation/labeling/" + filename):
+                os.makedirs("../Validation/labeling/" + filename)
+
+            im = Image.fromarray(boardImage)
+            im = im.convert('RGB')
+            im.save("../Validation/labeling/" + filename + "/board.png")
+
+            im = Image.fromarray(lignesImage)
+            im = im.convert('RGB')
+            im.save("../Validation/labeling/" + filename + "/lignes.png")
+
+            im = Image.fromarray(schemaImage)
+            im = im.convert('RGB')
+            im.save("../Validation/labeling/" + filename + "/schema.png")
+
+
+
+if __name__ == '__main__':
+    main()
