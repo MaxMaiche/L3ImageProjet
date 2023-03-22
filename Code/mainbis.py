@@ -67,7 +67,7 @@ pts1 = np.float32([[lineTop[0], lineTop[1]], [lineTop[2], lineTop[3]], [lineBott
 ratio = ((abs(lineTop[0] - lineTop[2]) + abs(lineBottom[0] - lineBottom[2])) / 2) / ((abs(lineTop[1] - lineBottom[1]) + abs(lineTop[3] - lineBottom[3])) / 2)
 print("Ligne1 : ", lineTop)
 print("Ligne2 : ", lineBottom)
-print(ratio)
+print("ratio: ", ratio)
 
 boardW = 1024
 boardH = int(boardW/ratio)
@@ -95,13 +95,8 @@ points = np.array([[lineTop[0], lineTop[1]],
 cv.fillPoly(binaryImage, pts=[points], color=(255, 255, 255))
 cv.imwrite('binary.jpg', binaryImage)
 nomImage = nomImage.split(".")[0]
-valid = cv.imread("../Validation/labeling/"+nomImage+"/board.png",cv.IMREAD_GRAYSCALE)
-print(valid)
-score = validation.compare(valid, binaryImage)
+valid = cv.imread("../Validation/labeling/"+nomImage+"/board.png", cv.IMREAD_GRAYSCALE)
 
-if score > 0.8:
-    print("Score : ", score)
-    print("Validation réussie")
-else:
-    print("Score : ", score)
-    print("Validation échouée")
+score = validation.compare(valid, binaryImage)
+print("Score : ", score)
+print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")

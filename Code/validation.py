@@ -12,13 +12,13 @@ def compare(image1, image2):
     width2 = image2.shape[1]
 
     if width1 > width2:
-        ratio = width2 / width1
-        dim = (width2, int(image1.shape[0] * ratio))
+        dim = (width2, image2.shape[0])
         image1 = cv.resize(image1, dim)
     else:
-        ratio = width1 / width2
-        dim = (width1, int(image2.shape[0] * ratio))
+        dim = (width1, image1.shape[0])
         image2 = cv.resize(image2, dim)
+
+
 
     sumUnion = 0
     sumInter = 0
