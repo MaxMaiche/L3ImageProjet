@@ -35,8 +35,8 @@ edges = cv.erode(edges, kernel, iterations=1)
 # Identify lines
 lines = cv.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=5)
 
-lineTop = (0, 0, img.shape[0], 0)
-lineBottom = (0, img.shape[1], img.shape[0], img.shape[1])
+lineTop = (0, 0, img.shape[1], 0)
+lineBottom = (0, img.shape[0], img.shape[1], img.shape[0])
 
 if lines is None:
     print(":/")
@@ -45,7 +45,7 @@ if lines is None:
 # Display each line on the original image
 for line in lines:
     x1, y1, x2, y2 = line[0]
-    if (y1 + y2) / 2 > img.shape[0] / 2:
+    if (y1 + y2) / 2 < img.shape[0] / 2:
         if (y1 + y2) / 2 > lineTop[1] and abs(x1 - x2) > 700:
             if y1 - lineTop[1] > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):
                 lineTop = (x1, y1, x2, y2)
