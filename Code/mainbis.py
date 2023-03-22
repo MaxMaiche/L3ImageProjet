@@ -27,7 +27,7 @@ kernel = np.ones((3, 3), np.uint8)
 edges = cv.dilate(edges, kernel, iterations=1)
 
 # Closure
-kernel = np.ones((7, 7), np.uint8)
+kernel = np.ones((15, 15), np.uint8)
 edges = cv.dilate(edges, kernel, iterations=1)
 edges = cv.erode(edges, kernel, iterations=1)
 #cv.morphologyEx(edges, cv.MORPH_CLOSE, kernel)
@@ -42,19 +42,21 @@ if lines is None:
     print(":/")
     exit()
 
+imgLines = img.copy()
+
 # Display each line on the original image
 for line in lines:
     x1, y1, x2, y2 = line[0]
     if (y1 + y2) / 2 < img.shape[0] / 2:
-        if (y1 + y2) / 2 > lineTop[1] and abs(x1 - x2) > 700:
+        if (y1 + y2) / 2 > (lineTop[1] + lineTop[3]) / 2 and abs(x1 - x2) > 700:
             if y1 - lineTop[1] > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):
                 lineTop = (x1, y1, x2, y2)
     else:
-        if (y1 + y2) / 2 < lineBottom[1] and abs(x1 - x2) > 700:
+        if (y1 + y2) / 2 < (lineBottom[1] + lineBottom[3]) / 2 and abs(x1 - x2) > 700:
             if lineBottom[1] - y1 > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):
                 lineBottom = (x1, y1, x2, y2)
 
-    # cv.line(img, (x1, y1), (x2, y2), (0, 200, 200), 2)
+    cv.line(imgLines, (x1, y1), (x2, y2), (0, 200, 200), 2)
 
 
 if lineTop[1] > lineBottom[1]:
@@ -85,6 +87,7 @@ cv.imwrite('gray.jpg', gray)
 cv.imwrite('edges.jpg', edges)
 cv.imwrite('resultat.jpg', img)
 cv.imwrite('transformed.jpg', board)
+cv.imwrite('lines.jpg', imgLines)
 
 binaryImage = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
 points = np.array([[lineTop[0], lineTop[1]],
