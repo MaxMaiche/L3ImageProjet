@@ -1,14 +1,10 @@
 import cv2 as cv
 import numpy as np
-import math
+import validation
 # Import image
-ok = False
-while not ok:
-    try:
-        img = cv.imread("../Ressources/Images/" + input("Nom de l'image : "))
-        ok = True
-    except:
-        pass
+nomImage = input("Nom de l'image : ")
+img = cv.imread("../Ressources/Images/" + nomImage)
+
 
 
 # Resize image
@@ -25,11 +21,6 @@ gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 # Do edge detection
 edges = cv.Canny(gray, 50, 150, apertureSize=3)
 
-# Ouverture
-#kernel = np.ones((3, 3), np.uint8)
-#cv.morphologyEx(edges, cv.MORPH_OPEN, kernel)
-#edges = cv.erode(edges, kernel, iterations=1)
-#edges = cv.dilate(edges, kernel, iterations=1)
 
 # Dilate edge detection image so the lines are more readable
 kernel = np.ones((3, 3), np.uint8)
@@ -86,11 +77,31 @@ pts2 = np.float32([[0, 0], [boardW, 0], [boardW, boardH], [0, boardH]])
 M = cv.getPerspectiveTransform(pts1, pts2)
 
 transformed = np.zeros((int(boardW), int(boardH)), dtype=np.uint8)
-dst = cv.warpPerspective(img, M, transformed.shape)
+board = cv.warpPerspective(img, M, transformed.shape)
 
 
 # Save images
 cv.imwrite('gray.jpg', gray)
 cv.imwrite('edges.jpg', edges)
 cv.imwrite('resultat.jpg', img)
-cv.imwrite('transformed.jpg', dst)
+cv.imwrite('transformed.jpg', board)
+
+binaryImage = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
+points = np.array([[lineTop[0], lineTop[1]],
+                   [lineTop[2], lineTop[3]],
+                   [lineBottom[2], lineBottom[3]],
+                   [lineBottom[0], lineBottom[1]]], np.int32)
+
+cv.fillPoly(binaryImage, pts=[points], color=(255, 255, 255))
+cv.imwrite('binary.jpg', binaryImage)
+nomImage = nomImage.split(".")[0]
+valid = cv.imread("../Validation/labeling/"+nomImage+"/board.png",cv.IMREAD_GRAYSCALE)
+print(valid)
+score = validation.compare(valid, binaryImage)
+
+if score > 0.8:
+    print("Score : ", score)
+    print("Validation réussie")
+else:
+    print("Score : ", score)
+    print("Validation échouée")
