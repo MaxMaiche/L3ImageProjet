@@ -131,3 +131,6 @@ dmypy.json
 # Fichiers PyCharm
 .idea
 .DS_Store
+
+# Images
+/Code/Resultats/*.jpg
