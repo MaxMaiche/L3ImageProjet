@@ -136,7 +136,7 @@ def getBoard(nomImage):
     edges = getEdges(img)
 
     # Get the lines
-    lineTop, lineBottom, lineLeft, lineRight = getBoardLines(edges, img)
+    lineTop, lineBottom, lineLeft, lineRight = getBoardLines(img, edges)
 
     # Get the corners of the board
     ptTopLeft = getIntersection(lineTop, lineLeft)
@@ -199,9 +199,9 @@ def doALL():
 
 
 def doOne():
-    getBoard("13.jpg")
+    getBoard("0.jpg")
 
 
 if __name__ == "__main__":
-    # doALL()
+    #doALL()
     doOne()
