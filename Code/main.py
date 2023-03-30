@@ -44,35 +44,70 @@ def getBoard(nomImage):
         print(":/")
         exit()
 
+    imgResult = img.copy()
     imgLines = img.copy()
 
-    # Display each line on the original image
+    # Identify the board's top and bottom lines
     for line in lines:
-        x1, y1, x2, y2 = line[0]
-        if (y1 + y2) / 2 < img.shape[0] / 2:
-            if (y1 + y2) / 2 > (lineTop[1] + lineTop[3]) / 2 and abs(x1 - x2) > 700:
-                if y1 - lineTop[1] > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):
-                    lineTop = (x1, y1, x2, y2)
-        else:
-            if (y1 + y2) / 2 < (lineBottom[1] + lineBottom[3]) / 2 and abs(x1 - x2) > 700:
-                if lineBottom[1] - y1 > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):
-                    lineBottom = (x1, y1, x2, y2)
+        x1, y1, x2, y2 = line[0]  # Coordinates of the line
+        if (y1 + y2) / 2 < img.shape[0] / 2:  # If the line is on the top of the image
+            if (y1 + y2) / 2 > (lineTop[1] + lineTop[
+                3]) / 2 and abs(x1 - x2) > 700:  # If the line is lower than the last one and is long enough
+                if (y1 + y2) / 2 - (lineTop[1] + lineTop[3]) / 2 > 50 or abs(lineTop[0] - lineTop[
+                    2]) < abs(x1 - x2):  # If the line is significantly lower or longer than the last one
+                    lineTop = (x1, y1, x2, y2)  # Set the line as the top line
+        else:  # If the line is on the bottom of the image
+            if (y1 + y2) / 2 < (lineBottom[1] + lineBottom[
+                3]) / 2 and abs(x1 - x2) > 700:  # If the line is higher than the last one and is long enough
+                if (lineBottom[1] + lineBottom[3]) / 2 - (y1 + y2) / 2 > 50 or abs(lineTop[0] - lineTop[
+                    2]) < abs(x1 - x2):  # If the line is significantly higher or longer than the last one
+                    lineBottom = (x1, y1, x2, y2)  # Set the line as the bottom line
 
+        # Draw the line for the lines image
         cv.line(imgLines, (x1, y1), (x2, y2), (0, 200, 200), 2)
 
-    if lineTop[1] > lineBottom[1]:
-        lineTop, lineBottom = lineBottom, lineTop
+    # Draw the top and bottom lines on the results image
+    cv.line(imgResult, (lineTop[0], lineTop[1]), (lineTop[2], lineTop[3]), (0, 0, 255), 10)
+    cv.line(imgResult, (lineBottom[0], lineBottom[1]), (lineBottom[2], lineBottom[3]), (0, 0, 255), 10)
 
-    cv.line(img, (lineTop[0], lineTop[1]), (lineTop[2], lineTop[3]), (0, 0, 255), 10)
-    cv.line(img, (lineBottom[0], lineBottom[1]), (lineBottom[2], lineBottom[3]), (0, 0, 255), 10)
+    # Identify the left and right lines
+    lineLeft = (img.shape[1] // 2, lineTop[1], img.shape[1] // 2, lineBottom[1])
+    lineRight = (img.shape[1] // 2, lineTop[3], img.shape[1] // 2, lineBottom[3])
+
+    dLeft = abs(lineTop[1] - lineBottom[1])
+    dRight = abs(lineTop[3] - lineBottom[3])
+
+    for line in lines:
+        x1, y1, x2, y2 = line[0]  # Coordinates of the line
+        if (x1 + x2) / 2 < img.shape[1] / 2:  # If the line is on the left of the image
+            if (x1 + x2) / 2 < (lineLeft[0] + lineLeft[
+                2]) / 2 and 0.9 < abs(y1 - y2) / dLeft < 1.1:  # If the line is on the left of the last one and is around the same height as the board
+                print("left")
+                if (x1 + x2) / 2 - (lineLeft[0] + lineLeft[2]) / 2 < -50 or abs(lineLeft[1] - lineLeft[
+                    3]) < abs(y1 - y2):  # If the line is significantly on the left or longer than the last one
+                    lineLeft = (x1, y1, x2, y2)  # Set the line as the left line
+        else:  # If the line is on the right of the image
+            if (x1 + x2) / 2 > (lineRight[0] + lineRight[
+                2]) / 2 and 0.9 < abs(y1 - y2) / dRight < 1.1:  # If the line is on the right of the last one and is around the same height as the board
+                print("right")
+                if (lineRight[0] + lineRight[2]) / 2 - (x1 + x2) / 2 < -50 or abs(lineRight[1] - lineRight[
+                    3]) < abs(y1 - y2):  # If the line is significantly on the right or longer than the last one
+                    lineRight = (x1, y1, x2, y2)  # Set the line as the right line
+
+    # If the left and right lines are defaut value, set them to the edges of the image
+    if lineLeft == (img.shape[1] // 2, lineTop[1], img.shape[1] // 2, lineBottom[1]):
+        lineLeft = (0, lineTop[1], 0, lineBottom[1])
+    if lineRight == (img.shape[1] // 2, lineTop[3], img.shape[1] // 2, lineBottom[3]):
+        lineRight = (img.shape[1], lineTop[3], img.shape[1], lineBottom[3])
+
+    # Draw the left and right lines on the results image
+    cv.line(imgResult, (lineLeft[0], lineLeft[1]), (lineLeft[2], lineLeft[3]), (0, 0, 255), 10)
+    cv.line(imgResult, (lineRight[0], lineRight[1]), (lineRight[2], lineRight[3]), (0, 0, 255), 10)
 
     pts1 = np.float32([[lineTop[0], lineTop[1]], [lineTop[2], lineTop[3]], [lineBottom[2], lineBottom[3]],
                        [lineBottom[0], lineBottom[1]]])
     ratio = ((abs(lineTop[0] - lineTop[2]) + abs(lineBottom[0] - lineBottom[2])) / 2) / (
                 (abs(lineTop[1] - lineBottom[1]) + abs(lineTop[3] - lineBottom[3])) / 2)
-    # print("Ligne1 : ", lineTop)
-    # print("Ligne2 : ", lineBottom)
-    # print("ratio: ", ratio)
 
     boardW = 1024
     boardH = int(boardW / ratio)
@@ -87,8 +122,9 @@ def getBoard(nomImage):
     # Save images
     cv.imwrite('Resultats/gray.jpg', gray)
     cv.imwrite('Resultats/edges.jpg', edges)
-    cv.imwrite('Resultats/resultat.jpg', img)
+    cv.imwrite('Resultats/result.jpg', imgResult)
     cv.imwrite('Resultats/transformed.jpg', board)
+    cv.imwrite('Resultats/lines.jpg', imgLines)
 
     binaryImage = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
     points = np.array([[lineTop[0], lineTop[1]],
@@ -102,7 +138,7 @@ def getBoard(nomImage):
     valid = cv.imread("../Validation/labeling/" + nomImage + "/board.png", cv.IMREAD_GRAYSCALE)
 
     score = validation.compare(valid, binaryImage)
-    print("Image : ", nomImage)
+    print(f"Image : {nomImage}")
     print("Score : {:.2f}%".format(score * 100))
     print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
     if score > 0.9:
