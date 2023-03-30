@@ -4,29 +4,36 @@ import validation
 import os
 
 
-def getBoard(nomImage):
-    # # Import image
-    # nomImage = input("Nom de l'image : ")
-    # img = cv.imread("../Ressources/Images/" + nomImage)
-    img = cv.imread("../Ressources/Images/" + nomImage)
+def getIntersection(line1, line2):
+    """
+    Get the intersection of two lines
+    :param line1: the first line
+    :param line2: the second line
+    :return: [x, y] the coordinates of the intersection
+    """
+    x1, y1, x2, y2 = line1
+    x3, y3, x4, y4 = line2
 
-    # Resize image
-    width = img.shape[1]
-    height = img.shape[0]
-    ratio = 1024 / width
-    dim = (1024, int(height * ratio))
+    if x1 == x2:
+        x1 += 0.0000001
+    if x3 == x4:
+        x3 += 0.0000001
 
-    img = cv.resize(img, dim)
+    a1 = (y2 - y1) / (x2 - x1)
+    b1 = y1 - a1 * x1
 
-    # Make image grayscale
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    a2 = (y4 - y3) / (x4 - x3)
+    b2 = y3 - a2 * x3
 
+    x = (b2 - b1) / (a1 - a2)
+    y = a1 * x + b1
+
+    return [x, y]
+
+
+def getEdges(gray):
     # Do edge detection
     edges = cv.Canny(gray, 50, 150, apertureSize=3)
-
-    # Dilate edge detection image so the lines are more readable
-    kernel = np.ones((3, 3), np.uint8)
-    edges = cv.dilate(edges, kernel, iterations=1)
 
     # Closure
     kernel = np.ones((15, 15), np.uint8)
@@ -34,6 +41,14 @@ def getBoard(nomImage):
     edges = cv.erode(edges, kernel, iterations=1)
     # cv.morphologyEx(edges, cv.MORPH_CLOSE, kernel)
 
+    # Dilate edge detection image so the lines are more readable
+    kernel = np.ones((5, 5), np.uint8)
+    edges = cv.dilate(edges, kernel, iterations=1)
+
+    return edges
+
+
+def getBoardLines(img, edges):
     # Identify lines
     lines = cv.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=5)
 
@@ -51,16 +66,12 @@ def getBoard(nomImage):
     for line in lines:
         x1, y1, x2, y2 = line[0]  # Coordinates of the line
         if (y1 + y2) / 2 < img.shape[0] / 2:  # If the line is on the top of the image
-            if (y1 + y2) / 2 > (lineTop[1] + lineTop[
-                3]) / 2 and abs(x1 - x2) > 700:  # If the line is lower than the last one and is long enough
-                if (y1 + y2) / 2 - (lineTop[1] + lineTop[3]) / 2 > 50 or abs(lineTop[0] - lineTop[
-                    2]) < abs(x1 - x2):  # If the line is significantly lower or longer than the last one
+            if (y1 + y2) / 2 > (lineTop[1] + lineTop[3]) / 2 and abs(x1 - x2) > 650:  # If the line is lower than the last one and is long enough
+                if (y1 + y2) / 2 - (lineTop[1] + lineTop[3]) / 2 > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):  # If the line is significantly lower or longer than the last one
                     lineTop = (x1, y1, x2, y2)  # Set the line as the top line
         else:  # If the line is on the bottom of the image
-            if (y1 + y2) / 2 < (lineBottom[1] + lineBottom[
-                3]) / 2 and abs(x1 - x2) > 700:  # If the line is higher than the last one and is long enough
-                if (lineBottom[1] + lineBottom[3]) / 2 - (y1 + y2) / 2 > 50 or abs(lineTop[0] - lineTop[
-                    2]) < abs(x1 - x2):  # If the line is significantly higher or longer than the last one
+            if (y1 + y2) / 2 < (lineBottom[1] + lineBottom[3]) / 2 and abs(x1 - x2) > 650:  # If the line is higher than the last one and is long enough
+                if (lineBottom[1] + lineBottom[3]) / 2 - (y1 + y2) / 2 > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):  # If the line is significantly higher or longer than the last one
                     lineBottom = (x1, y1, x2, y2)  # Set the line as the bottom line
 
         # Draw the line for the lines image
@@ -80,18 +91,12 @@ def getBoard(nomImage):
     for line in lines:
         x1, y1, x2, y2 = line[0]  # Coordinates of the line
         if (x1 + x2) / 2 < img.shape[1] / 2:  # If the line is on the left of the image
-            if (x1 + x2) / 2 < (lineLeft[0] + lineLeft[
-                2]) / 2 and 0.9 < abs(y1 - y2) / dLeft < 1.1:  # If the line is on the left of the last one and is around the same height as the board
-                print("left")
-                if (x1 + x2) / 2 - (lineLeft[0] + lineLeft[2]) / 2 < -50 or abs(lineLeft[1] - lineLeft[
-                    3]) < abs(y1 - y2):  # If the line is significantly on the left or longer than the last one
+            if (x1 + x2) / 2 < (lineLeft[0] + lineLeft[2]) / 2 and 0.9 < abs(y1 - y2) / dLeft < 1.1:  # If the line is on the left of the last one and is around the same height as the board
+                if (x1 + x2) / 2 - (lineLeft[0] + lineLeft[2]) / 2 < -50 or abs(lineLeft[1] - lineLeft[3]) < abs(y1 - y2):  # If the line is significantly on the left or longer than the last one
                     lineLeft = (x1, y1, x2, y2)  # Set the line as the left line
         else:  # If the line is on the right of the image
-            if (x1 + x2) / 2 > (lineRight[0] + lineRight[
-                2]) / 2 and 0.9 < abs(y1 - y2) / dRight < 1.1:  # If the line is on the right of the last one and is around the same height as the board
-                print("right")
-                if (lineRight[0] + lineRight[2]) / 2 - (x1 + x2) / 2 < -50 or abs(lineRight[1] - lineRight[
-                    3]) < abs(y1 - y2):  # If the line is significantly on the right or longer than the last one
+            if (x1 + x2) / 2 > (lineRight[0] + lineRight[2]) / 2 and 0.9 < abs(y1 - y2) / dRight < 1.1:  # If the line is on the right of the last one and is around the same height as the board
+                if (lineRight[0] + lineRight[2]) / 2 - (x1 + x2) / 2 < -50 or abs(lineRight[1] - lineRight[3]) < abs(y1 - y2):  # If the line is significantly on the right or longer than the last one
                     lineRight = (x1, y1, x2, y2)  # Set the line as the right line
 
     # If the left and right lines are defaut value, set them to the edges of the image
@@ -104,10 +109,45 @@ def getBoard(nomImage):
     cv.line(imgResult, (lineLeft[0], lineLeft[1]), (lineLeft[2], lineLeft[3]), (0, 0, 255), 10)
     cv.line(imgResult, (lineRight[0], lineRight[1]), (lineRight[2], lineRight[3]), (0, 0, 255), 10)
 
-    pts1 = np.float32([[lineTop[0], lineTop[1]], [lineTop[2], lineTop[3]], [lineBottom[2], lineBottom[3]],
-                       [lineBottom[0], lineBottom[1]]])
-    ratio = ((abs(lineTop[0] - lineTop[2]) + abs(lineBottom[0] - lineBottom[2])) / 2) / (
-                (abs(lineTop[1] - lineBottom[1]) + abs(lineTop[3] - lineBottom[3])) / 2)
+    cv.imwrite('Resultats/lines.jpg', imgLines)
+    cv.imwrite('Resultats/result.jpg', imgResult)
+
+    return lineTop, lineBottom, lineLeft, lineRight
+
+
+def getBoard(nomImage):
+    # # Import image
+    # nomImage = input("Nom de l'image : ")
+    # img = cv.imread("../Ressources/Images/" + nomImage)
+    img = cv.imread("../Ressources/Images/" + nomImage)
+
+    # Resize image
+    width = img.shape[1]
+    height = img.shape[0]
+    ratio = 1024 / width
+    dim = (1024, int(height * ratio))
+
+    img = cv.resize(img, dim)
+
+    # Make image grayscale
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+    # Get the edges
+    edges = getEdges(img)
+
+    # Get the lines
+    lineTop, lineBottom, lineLeft, lineRight = getBoardLines(edges, img)
+
+    # Get the corners of the board
+    ptTopLeft = getIntersection(lineTop, lineLeft)
+    ptTopRight = getIntersection(lineTop, lineRight)
+    ptBottomLeft = getIntersection(lineBottom, lineLeft)
+    ptBottomRight = getIntersection(lineBottom, lineRight)
+
+    # Apply perspective transform
+    pts1 = np.float32([ptTopLeft, ptTopRight, ptBottomRight, ptBottomLeft])
+    ratio = (((ptTopRight[0] - ptTopLeft[0]) + (ptBottomRight[0] - ptBottomLeft[0])) / 2) / (
+            ((ptBottomLeft[1] - ptTopLeft[1]) + (ptBottomRight[1] - ptTopRight[1])) / 2)
 
     boardW = 1024
     boardH = int(boardW / ratio)
@@ -122,15 +162,11 @@ def getBoard(nomImage):
     # Save images
     cv.imwrite('Resultats/gray.jpg', gray)
     cv.imwrite('Resultats/edges.jpg', edges)
-    cv.imwrite('Resultats/result.jpg', imgResult)
     cv.imwrite('Resultats/transformed.jpg', board)
-    cv.imwrite('Resultats/lines.jpg', imgLines)
 
+    # Compare to validation
     binaryImage = np.zeros((img.shape[0], img.shape[1]), dtype=np.uint8)
-    points = np.array([[lineTop[0], lineTop[1]],
-                       [lineTop[2], lineTop[3]],
-                       [lineBottom[2], lineBottom[3]],
-                       [lineBottom[0], lineBottom[1]]], np.int32)
+    points = np.array([ptTopLeft, ptTopRight, ptBottomRight, ptBottomLeft], np.int32)
 
     cv.fillPoly(binaryImage, pts=[points], color=(255, 255, 255))
     cv.imwrite('Resultats/binary.jpg', binaryImage)
@@ -163,7 +199,7 @@ def doALL():
 
 
 def doOne():
-    getBoard("33.jpg")
+    getBoard("13.jpg")
 
 
 if __name__ == "__main__":
