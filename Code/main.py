@@ -132,12 +132,12 @@ def getAllLines(image):
         if cv.contourArea(c)>20*avgArea:  #20% de la longeur = ligne -> à modifier pour meilleur résultat IMPORTANT
             cv.drawContours(mask, [c], -1, 0, -1)
             binary = cv.bitwise_and(binary, binary, mask=mask) # subtracting the noise
-    cv.imwrite('noise.png', mask)
-    cv.imshow('mask', mask)
-    cv.imshow('binary_noise_removal', ~binary)
-    cv.imwrite('binary_noise_removal.png', ~binary)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+    #cv.imwrite('noise.png', mask)
+    #cv.imshow('mask', mask)
+    #cv.imshow('binary_noise_removal', ~binary)
+    #cv.imwrite('binary_noise_removal.png', ~binary)
+    #cv.waitKey(0)
+    #cv.destroyAllWindows()
 
 def lines_extraction(gray,minLineLength,maxLineGap):
     edges = cv.Canny(gray, 75, 150)
