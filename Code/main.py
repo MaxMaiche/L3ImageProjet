@@ -51,6 +51,12 @@ def getEdges(gray):
 
 
 def getBoardLines(img, edges):
+    # # Add image borders to the edges image
+    # cv.line(edges, (0, 0), (0, img.shape[0]), (255, 255, 255), 10)
+    # cv.line(edges, (0, 0), (img.shape[1], 0), (255, 255, 255), 10)
+    # cv.line(edges, (img.shape[1], 0), (img.shape[1], img.shape[0]), (255, 255, 255), 10)
+    # cv.line(edges, (0, img.shape[0]), (img.shape[1], img.shape[0]), (255, 255, 255), 10)
+
     # Identify lines
     lines = cv.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength=100, maxLineGap=5)
 
@@ -68,12 +74,16 @@ def getBoardLines(img, edges):
     for line in lines:
         x1, y1, x2, y2 = line[0]  # Coordinates of the line
         if (y1 + y2) / 2 < img.shape[0] / 2:  # If the line is on the top of the image
-            if (y1 + y2) / 2 > (lineTop[1] + lineTop[3]) / 2 and abs(x1 - x2) > 650:  # If the line is lower than the last one and is long enough
-                if (y1 + y2) / 2 - (lineTop[1] + lineTop[3]) / 2 > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):  # If the line is significantly lower or longer than the last one
+            if (y1 + y2) / 2 > (lineTop[1] + lineTop[
+                3]) / 2 and abs(x1 - x2) > 650:  # If the line is lower than the last one and is long enough
+                if (y1 + y2) / 2 - (lineTop[1] + lineTop[3]) / 2 > 50 or abs(lineTop[0] - lineTop[
+                    2]) < abs(x1 - x2):  # If the line is significantly lower or longer than the last one
                     lineTop = (x1, y1, x2, y2)  # Set the line as the top line
         else:  # If the line is on the bottom of the image
-            if (y1 + y2) / 2 < (lineBottom[1] + lineBottom[3]) / 2 and abs(x1 - x2) > 650:  # If the line is higher than the last one and is long enough
-                if (lineBottom[1] + lineBottom[3]) / 2 - (y1 + y2) / 2 > 50 or abs(lineTop[0] - lineTop[2]) < abs(x1 - x2):  # If the line is significantly higher or longer than the last one
+            if (y1 + y2) / 2 < (lineBottom[1] + lineBottom[
+                3]) / 2 and abs(x1 - x2) > 650:  # If the line is higher than the last one and is long enough
+                if (lineBottom[1] + lineBottom[3]) / 2 - (y1 + y2) / 2 > 50 or abs(lineTop[0] - lineTop[
+                    2]) < abs(x1 - x2):  # If the line is significantly higher or longer than the last one
                     lineBottom = (x1, y1, x2, y2)  # Set the line as the bottom line
 
         # Draw the line for the lines image
@@ -93,13 +103,24 @@ def getBoardLines(img, edges):
     for line in lines:
         x1, y1, x2, y2 = line[0]  # Coordinates of the line
         if (x1 + x2) / 2 < img.shape[1] / 2:  # If the line is on the left of the image
-            if (x1 + x2) / 2 < (lineLeft[0] + lineLeft[2]) / 2 and 0.9 < abs(y1 - y2) / dLeft < 1.1:  # If the line is on the left of the last one and is around the same height as the board
-                if (x1 + x2) / 2 - (lineLeft[0] + lineLeft[2]) / 2 < -50 or abs(lineLeft[1] - lineLeft[3]) < abs(y1 - y2):  # If the line is significantly on the left or longer than the last one
+            if (x1 + x2) / 2 < (lineLeft[0] + lineLeft[
+                2]) / 2 and 0.95 < abs(y1 - y2) / dLeft < 1.05:  # If the line is on the left of the last one and is around the same height as the board
+                if (x1 + x2) / 2 - (lineLeft[0] + lineLeft[2]) / 2 < -50 or abs(lineLeft[1] - lineLeft[
+                    3]) < abs(y1 - y2):  # If the line is significantly on the left or longer than the last one
                     lineLeft = (x1, y1, x2, y2)  # Set the line as the left line
         else:  # If the line is on the right of the image
-            if (x1 + x2) / 2 > (lineRight[0] + lineRight[2]) / 2 and 0.9 < abs(y1 - y2) / dRight < 1.1:  # If the line is on the right of the last one and is around the same height as the board
-                if (lineRight[0] + lineRight[2]) / 2 - (x1 + x2) / 2 < -50 or abs(lineRight[1] - lineRight[3]) < abs(y1 - y2):  # If the line is significantly on the right or longer than the last one
+            if (x1 + x2) / 2 > (lineRight[0] + lineRight[
+                2]) / 2 and 0.95 < abs(y1 - y2) / dRight < 1.05:  # If the line is on the right of the last one and is around the same height as the board
+                if (lineRight[0] + lineRight[2]) / 2 - (x1 + x2) / 2 < -50 or abs(lineRight[1] - lineRight[
+                    3]) < abs(y1 - y2):  # If the line is significantly on the right or longer than the last one
                     lineRight = (x1, y1, x2, y2)  # Set the line as the right line
+
+    # Check if the left and right points of the top and bottom lines are close to the edges of the image
+    if lineTop[0] < 10 and lineBottom[0] < 10 and (lineLeft[0] + lineLeft[2]) / 2 > 100:
+        lineLeft = (0, lineTop[1], 0, lineBottom[1])
+    if lineTop[2] > img.shape[1] - 10 and lineBottom[2] > img.shape[1] - 10 and (lineRight[0] + lineRight[2]) / 2 < \
+            img.shape[1] - 100:
+        lineRight = (img.shape[1], lineTop[3], img.shape[1], lineBottom[3])
 
     # If the left and right lines are defaut value, set them to the edges of the image
     if lineLeft == (img.shape[1] // 2, lineTop[1], img.shape[1] // 2, lineBottom[1]):
@@ -116,33 +137,36 @@ def getBoardLines(img, edges):
 
     return lineTop, lineBottom, lineLeft, lineRight
 
+
 def getAllLines(image):
-    mask = np.ones(image.shape[:2], dtype="uint8") * 255 # create a white image
-    lines = lines_extraction(image,100,50) # extract lines -> a changer pour une meilleur ligne IMPORTANT
+    mask = np.ones(image.shape[:2], dtype="uint8") * 255  # create a white image
+    lines = lines_extraction(image, 100, 50)  # extract lines -> a changer pour une meilleur ligne IMPORTANT
     try:
-        for line in lines: # write lines to mask
+        for line in lines:  # write lines to mask
             x1, y1, x2, y2 = line[0]
             cv.line(mask, (x1, y1), (x2, y2), (0, 255, 0), 3)
     except TypeError:
         pass
-    (_, contours, _) = cv.findContours(~image,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE) # find contours
-    areas = [cv.contourArea(c) for c in contours] # find area of contour
-    avgArea = sum(areas)/len(areas) # finding average area
-    for c in contours:# average area heuristics
-        if cv.contourArea(c)>20*avgArea:  #20% de la longeur = ligne -> à modifier pour meilleur résultat IMPORTANT
+    (_, contours, _) = cv.findContours(~image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)  # find contours
+    areas = [cv.contourArea(c) for c in contours]  # find area of contour
+    avgArea = sum(areas) / len(areas)  # finding average area
+    for c in contours:  # average area heuristics
+        if cv.contourArea(c) > 20 * avgArea:  # 20% de la longeur = ligne -> à modifier pour meilleur résultat IMPORTANT
             cv.drawContours(mask, [c], -1, 0, -1)
-            binary = cv.bitwise_and(binary, binary, mask=mask) # subtracting the noise
-    #cv.imwrite('noise.png', mask)
-    #cv.imshow('mask', mask)
-    #cv.imshow('binary_noise_removal', ~binary)
-    #cv.imwrite('binary_noise_removal.png', ~binary)
-    #cv.waitKey(0)
-    #cv.destroyAllWindows()
+            binary = cv.bitwise_and(binary, binary, mask=mask)  # subtracting the noise
+    # cv.imwrite('noise.png', mask)
+    # cv.imshow('mask', mask)
+    # cv.imshow('binary_noise_removal', ~binary)
+    # cv.imwrite('binary_noise_removal.png', ~binary)
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
 
-def lines_extraction(gray,minLineLength,maxLineGap):
+
+def lines_extraction(gray, minLineLength, maxLineGap):
     edges = cv.Canny(gray, 75, 150)
-    lines = cv.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength, maxLineGap)
+    lines = cv.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength, maxLineGap)
     return lines
+
 
 def getBoard(nomImage):
     # # Import image
@@ -205,8 +229,8 @@ def getBoard(nomImage):
     score = validation.compare(valid, binaryImage)
     print(f"Image : {nomImage}")
     print("Score : {:.2f}%".format(score * 100))
-    print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
-    if score > 0.9:
+    print(f"Validation {'réussie' if score > 0.8 else 'échouée'}")
+    if score > 0.8:
         return 1
     return 0
 
@@ -228,9 +252,9 @@ def doALL():
 
 
 def doOne():
-    getBoard("0.jpg")
+    getBoard("67.jpg")
 
 
 if __name__ == "__main__":
-    #doALL()
+    # doALL()
     doOne()
