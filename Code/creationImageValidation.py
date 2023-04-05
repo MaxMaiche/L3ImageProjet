@@ -257,7 +257,8 @@ def unionBinaryImage(image1, image2, height, width):
                 image1[x, y] = 0
 
     return image1
-
+def getAllLines(image):
+    
 def main():
     folder_path = '../Ressources/labeling'
     allowed_extensions = '.json'

@@ -2,6 +2,8 @@ import cv2 as cv
 import numpy as np
 import validation
 import os
+from pythonRLSA import rlsa
+import math
 
 
 def getIntersection(line1, line2):
@@ -114,6 +116,33 @@ def getBoardLines(img, edges):
 
     return lineTop, lineBottom, lineLeft, lineRight
 
+def getAllLines(image):
+    mask = np.ones(image.shape[:2], dtype="uint8") * 255 # create a white image
+    lines = lines_extraction(image,100,50) # extract lines -> a changer pour une meilleur ligne IMPORTANT
+    try:
+        for line in lines: # write lines to mask
+            x1, y1, x2, y2 = line[0]
+            cv.line(mask, (x1, y1), (x2, y2), (0, 255, 0), 3)
+    except TypeError:
+        pass
+    (_, contours, _) = cv.findContours(~image,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE) # find contours
+    areas = [cv.contourArea(c) for c in contours] # find area of contour
+    avgArea = sum(areas)/len(areas) # finding average area
+    for c in contours:# average area heuristics
+        if cv.contourArea(c)>20*avgArea:  #20% de la longeur = ligne -> à modifier pour meilleur résultat IMPORTANT
+            cv.drawContours(mask, [c], -1, 0, -1)
+            binary = cv.bitwise_and(binary, binary, mask=mask) # subtracting the noise
+    cv.imwrite('noise.png', mask)
+    cv.imshow('mask', mask)
+    cv.imshow('binary_noise_removal', ~binary)
+    cv.imwrite('binary_noise_removal.png', ~binary)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+
+def lines_extraction(gray,minLineLength,maxLineGap):
+    edges = cv.Canny(gray, 75, 150)
+    lines = cv.HoughLinesP(edges, 1, np.pi/180, 100, minLineLength, maxLineGap)
+    return lines
 
 def getBoard(nomImage):
     # # Import image
