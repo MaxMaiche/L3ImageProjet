@@ -2,9 +2,9 @@ import random
 
 import cv2 as cv
 import numpy as np
+from rlsa import rlsa
 import validation
 import os
-from pythonRLSA import rlsa
 import math
 
 
@@ -229,6 +229,11 @@ def getBoard(nomImage):
         return 1
     return 0
 
+def getRlsa(image, horizontal, vertical):
+    newimage = rlsa.rlsa(image, horizontal, vertical)
+    return newimage
+
+
 
 def doALL():
     folder_path = '../Ressources/Images'
@@ -248,8 +253,11 @@ def doALL():
 
 def doOne():
     getBoard("37.jpeg")
+    getRlsa("37.jpeg", 10, 10)
+
+
 
 
 if __name__ == "__main__":
-    doALL()
-    # doOne()
+    # doALL()
+    doOne()
