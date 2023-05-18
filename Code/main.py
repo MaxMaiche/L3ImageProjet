@@ -164,7 +164,7 @@ def lines_extraction(gray, minLineLength, maxLineGap):
 
 
 def getBoard(nomImage):
-    # # Import image
+    # Import image
     # nomImage = input("Nom de l'image : ")
     # img = cv.imread("../Ressources/Images/" + nomImage)
     img = cv.imread("../Ressources/Images/" + nomImage)
