@@ -33,7 +33,3 @@ def rlsa(image, horizontal, vertical):
 
     return result
 
-
-    
-
-    return image
