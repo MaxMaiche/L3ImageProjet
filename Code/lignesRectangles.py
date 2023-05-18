@@ -10,6 +10,9 @@ from main import getEdges, getBoardLines, getIntersection
 
 # sys.setrecursionlimit(100000)
 
+global totalpourcent
+totalpourcent = []
+
 bordureW = 30
 bordureH = 10
 
@@ -249,6 +252,10 @@ def main_test(nomImage):
     valid = cv.imread("../Validation/labeling/" + nomImage + "/lignes.png", cv.IMREAD_GRAYSCALE)
 
     score = validation.compare(valid, lignes_bin)
+
+    global totalpourcent
+    totalpourcent.append(score)
+
     print(f"Image : {nomImage}")
     print("Score : {:.2f}%".format(score * 100))
     print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
@@ -273,7 +280,10 @@ def doALL():
                 print()
 
     print("Score total : ", cpt, "/", cptTotal)
+    global totalpourcent
+    print(totalpourcent)
 
+if __name__ == '__main__':
+    doALL()
+    # main_test("0.jpg")
 
-main_test("0.jpg")
-#doALL()
