@@ -90,5 +90,5 @@ def do_one(nom_image):
 
 
 if __name__ == "__main__":
-    # doALL()
-    do_one("0.jpg")
+    do_all()
+    # do_one("0.jpg")

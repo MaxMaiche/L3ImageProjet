@@ -128,9 +128,6 @@ def enchainement(current_cc, composantes_connexes, img, ligne, icc=0):
         if icc2 >= len(composantes_connexes):
             break
         if enchaine(current_cc, composantes_connexes[icc2]):
-            if icc == 0:
-                x2, y2, w2, h2, surface2 = composantes_connexes[icc2]
-                cv.rectangle(img, (x2, y2), (x2 + w2, y2 + h2), (0, 0, 255), 2)
             ligne.append(composantes_connexes[icc2])
             composantes_connexes.pop(icc)
             np.concatenate((ligne,

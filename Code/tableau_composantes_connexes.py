@@ -183,18 +183,20 @@ def getBoardCC(nomImage):
 
     cv.fillPoly(binaryImage, pts=[points], color=(255, 255, 255))
     cv.imwrite('Resultats/binary.jpg', binaryImage)
-    nomImage = nomImage.split(".")[0]
-    valid = cv.imread("../Validation/labeling/" + nomImage + "/board.png", cv.IMREAD_GRAYSCALE)
+    # nomImage = nomImage.split(".")[0]
+    # valid = cv.imread("../Validation/labeling/" + nomImage + "/board.png", cv.IMREAD_GRAYSCALE)
+    #
+    # score = validation_comparaison.compare(valid, binaryImage)
+    # global totalpourcent
+    # totalpourcent.append(score * 100)
+    # print(f"Image : {nomImage}")
+    # print("Score : {:.2f}%".format(score * 100))
+    # print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
+    # if score > 0.9:
+    #     return 1
+    # return 0
 
-    score = validation_comparaison.compare(valid, binaryImage)
-    global totalpourcent
-    totalpourcent.append(score * 100)
-    print(f"Image : {nomImage}")
-    print("Score : {:.2f}%".format(score * 100))
-    print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
-    if score > 0.9:
-        return 1
-    return 0
+    return board, binaryImage
 
 
 def doALL():
