@@ -4,7 +4,7 @@ import cv2 as cv
 import numpy as np
 
 from Code import validation_comparaison
-from Code.traitements_basiques import getIntersection
+from Code.traitements_basiques import get_intersection
 
 global totalpourcent
 totalpourcent = []
@@ -136,7 +136,7 @@ def getBoardCC(nomImage):
         line1 = list(line1[0][0]) + list(line1[1][0])
         line2 = list(line2[0][0]) + list(line2[1][0])
 
-        intersection = getIntersection(line1, line2)
+        intersection = get_intersection(line1, line2)
         intersection = tuple([int(intersection[0]), int(intersection[1])])
         corners.append(intersection)
         cv.circle(biggestcc, intersection, 5, (255, 0, 0), -1)
