@@ -13,8 +13,8 @@ from main import getEdges, getBoardLines, getIntersection
 global totalpourcent
 totalpourcent = []
 
-bordureW = 30
-bordureH = 10
+bordureW = 40
+bordureH = 0
 
 
 def get_lignes_rectangles(board):
@@ -237,7 +237,14 @@ def main_test(nomImage):
 
     for ligne in lignes_simples:
         x1, y1, x2, y2 = ligne
-        pointsTransformes = np.array([[x1, y1]], dtype=np.float32).reshape(-1, 1, 2), np.array([[x2, y1]], dtype=np.float32).reshape(-1, 1, 2), np.array([[x2, y2]], dtype=np.float32).reshape(-1, 1, 2), np.array([[x1, y2]], dtype=np.float32).reshape(-1, 1, 2)
+        pointsTransformes = np.array([[x1, y1]], dtype=np.float32).reshape(-1, 1, 2), np.array([[x2,
+                                                                                                 y1]], dtype=np.float32).reshape(-1, 1, 2), np.array([
+                                                                                                                                                         [
+                                                                                                                                                             x2,
+                                                                                                                                                             y2]], dtype=np.float32).reshape(-1, 1, 2), np.array([
+                                                                                                                                                                                                                     [
+                                                                                                                                                                                                                         x1,
+                                                                                                                                                                                                                         y2]], dtype=np.float32).reshape(-1, 1, 2)
         # pointsDetransformes = [np.matmul(inverse_M, np.array([p[0], p[1], 1])) for p in pointsTransformes]
         # pointsOriginaux = [(int(p[0]), int(p[1])) for p in pointsDetransformes]
         pointsOriginaux = [cv.perspectiveTransform(p, np.linalg.inv(M)).reshape(-1, 2) for p in pointsTransformes]
@@ -283,7 +290,7 @@ def doALL():
     global totalpourcent
     print(totalpourcent)
 
-if __name__ == '__main__':
-    doALL()
-    # main_test("0.jpg")
 
+if __name__ == '__main__':
+    # doALL()
+    main_test("67.jpg")
