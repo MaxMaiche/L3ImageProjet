@@ -13,22 +13,28 @@ def get_board(nom_image):
     ratio = 1024 / width
     dimensions = (1024, int(height * ratio))
 
-    base_image = cv.resize(base_image, dimensions)
+    resized_base_image = cv.resize(base_image, dimensions)
 
     # Make image grayscale
-    base_grayscale = cv.cvtColor(base_image, cv.COLOR_BGR2GRAY)
+    base_grayscale = cv.cvtColor(resized_base_image, cv.COLOR_BGR2GRAY)
 
     # Get the edges
-    base_edges = getEdges(base_image)
+    base_edges = getEdges(resized_base_image)
 
     # Get the lines
-    line_top, line_bottom, line_left, line_right = getBoardLines(base_image, base_edges, minWidth=675)
+    line_top, line_bottom, line_left, line_right = getBoardLines(resized_base_image, base_edges, minWidth=675)
 
     # Get the corners of the board
     point_top_left = getIntersection(line_top, line_left)
     point_top_right = getIntersection(line_top, line_right)
     point_bottom_left = getIntersection(line_bottom, line_left)
     point_bottom_right = getIntersection(line_bottom, line_right)
+    
+    # Scale points back to original size
+    point_top_left = (int(point_top_left[0] / ratio), int(point_top_left[1] / ratio))
+    point_top_right = (int(point_top_right[0] / ratio), int(point_top_right[1] / ratio))
+    point_bottom_left = (int(point_bottom_left[0] / ratio), int(point_bottom_left[1] / ratio))
+    point_bottom_right = (int(point_bottom_right[0] / ratio), int(point_bottom_right[1] / ratio))
 
     # Apply perspective transform
     points_depart = np.float32([point_top_left, point_top_right, point_bottom_right, point_bottom_left])

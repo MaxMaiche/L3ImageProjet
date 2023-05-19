@@ -80,7 +80,7 @@ def get_composantes_connexes(img, img_output, tolerance=0.1):
         x, y, w, h, surface = stats[icomposante]
         cv.rectangle(img_output, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    cv.imwrite('Resultats/composantes_connexes.jpg', img_output)
+    cv.imwrite('Resultats/board_composantes_connexes.jpg', img_output)
 
     stats = [x for x in stats if x[0] > 0 and x[1] > 0]
 
@@ -122,7 +122,7 @@ def enchainement(current_cc, composantes_connexes, img, ligne, icc=0):
     if len(ligne) == 0:
         ligne.append(current_cc)
         cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-        cv.imwrite('Resultats/CC1.jpg', img)
+        cv.imwrite('Resultats/board_cc_racines.jpg', img)
 
     for icc2 in range(icc + 1, len(composantes_connexes)):
         if icc2 >= len(composantes_connexes):
@@ -131,7 +131,6 @@ def enchainement(current_cc, composantes_connexes, img, ligne, icc=0):
             if icc == 0:
                 x2, y2, w2, h2, surface2 = composantes_connexes[icc2]
                 cv.rectangle(img, (x2, y2), (x2 + w2, y2 + h2), (0, 0, 255), 2)
-                cv.imwrite('Resultats/CC1.jpg', img)
             ligne.append(composantes_connexes[icc2])
             composantes_connexes.pop(icc)
             np.concatenate((ligne,
