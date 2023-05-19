@@ -3,11 +3,13 @@ import os
 import cv2 as cv
 import numpy as np
 
-from Code import validation
-from Code.main import getIntersection
+from Code import validation_comparaison
+from Code.traitements_basiques import getIntersection
 
 global totalpourcent
 totalpourcent = []
+
+
 def calculEuclidienne(point1, point2):
     point1 = list(point1[0])
     point2 = list(point2[0])
@@ -111,7 +113,6 @@ def getBoardCC(nomImage):
     #     pt2 = tuple(edge[1][0])
     #     cv.line(biggestcc, pt1, pt2, (0, 0, 255), 5)
 
-
     kept_approx_edges = sorted(approx_edges, key=lambda x: x[2], reverse=True)[:4]
 
     # delete the distance
@@ -185,9 +186,9 @@ def getBoardCC(nomImage):
     nomImage = nomImage.split(".")[0]
     valid = cv.imread("../Validation/labeling/" + nomImage + "/board.png", cv.IMREAD_GRAYSCALE)
 
-    score = validation.compare(valid, binaryImage)
+    score = validation_comparaison.compare(valid, binaryImage)
     global totalpourcent
-    totalpourcent.append(score*100)
+    totalpourcent.append(score * 100)
     print(f"Image : {nomImage}")
     print("Score : {:.2f}%".format(score * 100))
     print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
@@ -213,6 +214,7 @@ def doALL():
     print("Score total : ", cpt, "/", cptTotal)
     global totalpourcent
     print(totalpourcent)
+
 
 if __name__ == "__main__":
     doALL()

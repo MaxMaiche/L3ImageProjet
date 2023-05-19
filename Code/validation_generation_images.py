@@ -1,12 +1,10 @@
-import numpy as np
-import skimage as ski
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import json
-from PIL import Image
-from time import time
-from random import shuffle, randint
 import os
+from time import time
+
+import numpy as np
+from PIL import Image
+
 
 def getLabeling(nomImage: str):
     f = open('../Ressources/labeling/' + nomImage + '.json')
@@ -121,8 +119,6 @@ def pixelinpolygones(height, width, polygone):
 
     for p in contours:
         image[p[1], p[0]] = 255
-
-
 
     # try:
     #     for x in range(max_y-1, min_y-1, -1):
@@ -248,6 +244,7 @@ def castRay(image, point, max_x):
     else:
         return 0
 
+
 def unionBinaryImage(image1, image2, height, width):
     for x in range(height):
         for y in range(width):
@@ -257,8 +254,10 @@ def unionBinaryImage(image1, image2, height, width):
                 image1[x, y] = 0
 
     return image1
-#def getAllLines(image):
-    
+
+
+# def getAllLines(image):
+
 def main():
     folder_path = '../Ressources/labeling'
     allowed_extensions = '.json'
@@ -284,14 +283,12 @@ def main():
             for i in range(len(s)):
                 schema.append(pixelinpolygones(height, width, s[i]))
 
-
             if len(board) == 0:
                 board.append(np.zeros((height, width), dtype=np.uint8))
             else:
                 boardImage = board[0]
                 for i in range(1, len(board)):
                     boardImage = unionBinaryImage(boardImage, board[i], height, width)
-
 
             if len(lignes) == 0:
                 lignes.append(np.zeros((height, width), dtype=np.uint8))
@@ -323,7 +320,6 @@ def main():
             im = Image.fromarray(schemaImage)
             im = im.convert('RGB')
             im.save("../Validation/labeling/" + filename + "/schema.png")
-
 
 
 if __name__ == '__main__':

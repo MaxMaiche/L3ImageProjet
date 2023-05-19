@@ -1,12 +1,5 @@
 import numpy as np
-import skimage as ski
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import json
-from PIL import Image
-from time import time
-from random import shuffle, randint
-import os
+
 
 def rlsa(image, horizontal, vertical):
     result = np.copy(image)  # Create a copy of the input image
@@ -32,4 +25,3 @@ def rlsa(image, horizontal, vertical):
                         result[j - k, i] = 0
 
     return result
-

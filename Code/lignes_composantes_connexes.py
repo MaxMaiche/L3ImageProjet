@@ -5,19 +5,16 @@ import random
 import cv2 as cv
 import numpy as np
 
-from Code import validation
-from main import getEdges, getBoardLines, getIntersection
+from Code import validation_comparaison
+from Code.traitements_basiques import getIntersection, getEdges, getBoardLines
 
-# sys.setrecursionlimit(100000)
-
-global totalpourcent
 totalpourcent = []
 
 bordureW = 40
 bordureH = 0
 
 
-def get_lignes_rectangles(board):
+def get_lines(board, base_image):
     board_edges = cv.Canny(board, 50, 150, apertureSize=3)
 
     # kernel = np.ones((2, 2), np.uint8)
@@ -25,15 +22,16 @@ def get_lignes_rectangles(board):
     # board_edges = cv.erode(board_edges, kernel, iterations=1)
 
     cv.imwrite('Resultats/board_edges.jpg', board_edges)
-    cc = get_composantes_connexes(board_edges, board.copy())
-    lignes = get_lignes(cc, board.copy())
+
+    composantes_connexes = get_composantes_connexes(board_edges, board.copy())
+    lignes = get_lignes(composantes_connexes, board.copy())
 
     # On affiche les lignes sur l'image d'output
     out = board.copy()
     for ligne in lignes:
         couleur = (random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255))
-        for cc in ligne:
-            x, y, w, h, surface = cc
+        for composante_connexe in ligne:
+            x, y, w, h, surface = composante_connexe
             cv.rectangle(out, (x, y), (x + w, y + h), couleur, 2)
     cv.imwrite('Resultats/lignesconnexes.jpg', out)
 
@@ -53,6 +51,8 @@ def get_lignes_rectangles(board):
         cv.rectangle(lignes_bin, (x1, y1), (x2, y2), (255, 255, 255), -1)
 
     cv.imwrite('Resultats/lignes_bin.jpg', lignes_bin)
+
+    return None, lignes_bin  # TODO : continue refactoring - return lignes originales
 
 
 def get_composantes_connexes(img, img_output, tolerance=0.1):
@@ -104,7 +104,7 @@ def enchaine(cc1, cc2, tolerance=0):
     return True
 
 
-def enchainement(cc, composantes_connexes, img, ligne=[], icc=0):
+def enchainement(cc, composantes_connexes, img, ligne, icc=0):
     x, y, w, h, surface = cc
 
     if len(ligne) == 0:
@@ -237,18 +237,17 @@ def main_test(nomImage):
 
     for ligne in lignes_simples:
         x1, y1, x2, y2 = ligne
-        pointsTransformes = np.array([[x1, y1]], dtype=np.float32).reshape(-1, 1, 2), np.array([[x2,
-                                                                                                 y1]], dtype=np.float32).reshape(-1, 1, 2), np.array([
-                                                                                                                                                         [
-                                                                                                                                                             x2,
-                                                                                                                                                             y2]], dtype=np.float32).reshape(-1, 1, 2), np.array([
-                                                                                                                                                                                                                     [
-                                                                                                                                                                                                                         x1,
-                                                                                                                                                                                                                         y2]], dtype=np.float32).reshape(-1, 1, 2)
+        pointsTransformes = (np.array([[x1, y1]], dtype=np.float32).reshape(-1, 1, 2),
+                             np.array([[x2, y1]], dtype=np.float32).reshape(-1, 1, 2),
+                             np.array([[x2, y2]], dtype=np.float32).reshape(-1, 1, 2),
+                             np.array([[x1, y2]], dtype=np.float32).reshape(-1, 1, 2))
+
         # pointsDetransformes = [np.matmul(inverse_M, np.array([p[0], p[1], 1])) for p in pointsTransformes]
         # pointsOriginaux = [(int(p[0]), int(p[1])) for p in pointsDetransformes]
+
         pointsOriginaux = [cv.perspectiveTransform(p, np.linalg.inv(M)).reshape(-1, 2) for p in pointsTransformes]
         pointsOriginaux = [(int(p[0][0]), int(p[0][1])) for p in pointsOriginaux]
+
         cv.fillConvexPoly(lignes_bin, np.array(pointsOriginaux), 255)
         cv.drawContours(imgLignesOriginales, [np.array(pointsOriginaux)], 0, (0, 0, 255), 2)
 
@@ -258,7 +257,7 @@ def main_test(nomImage):
     nomImage = nomImage.split(".")[0]
     valid = cv.imread("../Validation/labeling/" + nomImage + "/lignes.png", cv.IMREAD_GRAYSCALE)
 
-    score = validation.compare(valid, lignes_bin)
+    score = validation_comparaison.compare(valid, lignes_bin)
 
     global totalpourcent
     totalpourcent.append(score)
