@@ -13,15 +13,15 @@ pourcentages_lignes = []
 
 
 def traitement(nom_image):
-    img = cv.imread("../Ressources/Images/" + nom_image)
+    base_image = cv.imread("../Ressources/Images/" + nom_image)
 
     # •===• Obtention du tableau et des lignes •===•
     # Décommenter la ligne correspondant au traitement à tester
 
     # board, binary_board = tableau_composantes_connexes.get_board(img)
-    board, binary_board = tableau_detection_lignes.get_board(nom_image)
+    board, binary_board, M = tableau_detection_lignes.get_board(nom_image)
 
-    lines, binary_lines = lignes_composantes_connexes.get_lines(board, img)
+    lines, binary_lines = lignes_composantes_connexes.get_lines(board, base_image, M)
     # board, binary_board = lignes_rlsa.get_board(img)
 
     # •===• Validation •===•

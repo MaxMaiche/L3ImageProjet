@@ -1,7 +1,6 @@
 import cv2 as cv
 import numpy as np
 
-from Code import validation_comparaison
 from Code.traitements_basiques import getEdges, getBoardLines, getIntersection
 
 
@@ -57,4 +56,4 @@ def get_board(nom_image):
     cv.fillPoly(binary_board, pts=[board_points], color=(255, 255, 255))
     cv.imwrite('Resultats/board_binary.jpg', binary_board)
 
-    return board, binary_board
+    return board, binary_board, M
