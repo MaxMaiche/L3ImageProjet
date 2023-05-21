@@ -13,7 +13,7 @@ pourcentages_lignes = []
 
 
 def traitement(nom_image):
-    base_image = cv.imread("../Ressources/Images/" + nom_image)
+    base_image = cv.imread("../Ressources/VALIDATIONNEPASTOUCHER/" + nom_image)
 
     # •===• Obtention du tableau et des lignes •===•
     # Décommenter la ligne correspondant au traitement à tester
