@@ -3,11 +3,13 @@ import os
 import cv2 as cv
 import numpy as np
 
-from Code import validation
-from Code.main import getIntersection
+from Code import validation_comparaison
+from Code.traitements_basiques import get_intersection
 
 global totalpourcent
 totalpourcent = []
+
+
 def calculEuclidienne(point1, point2):
     point1 = list(point1[0])
     point2 = list(point2[0])
@@ -111,7 +113,6 @@ def getBoardCC(nomImage):
     #     pt2 = tuple(edge[1][0])
     #     cv.line(biggestcc, pt1, pt2, (0, 0, 255), 5)
 
-
     kept_approx_edges = sorted(approx_edges, key=lambda x: x[2], reverse=True)[:4]
 
     # delete the distance
@@ -135,7 +136,7 @@ def getBoardCC(nomImage):
         line1 = list(line1[0][0]) + list(line1[1][0])
         line2 = list(line2[0][0]) + list(line2[1][0])
 
-        intersection = getIntersection(line1, line2)
+        intersection = get_intersection(line1, line2)
         intersection = tuple([int(intersection[0]), int(intersection[1])])
         corners.append(intersection)
         cv.circle(biggestcc, intersection, 5, (255, 0, 0), -1)
@@ -182,18 +183,20 @@ def getBoardCC(nomImage):
 
     cv.fillPoly(binaryImage, pts=[points], color=(255, 255, 255))
     cv.imwrite('Resultats/binary.jpg', binaryImage)
-    nomImage = nomImage.split(".")[0]
-    valid = cv.imread("../Validation/labeling/" + nomImage + "/board.png", cv.IMREAD_GRAYSCALE)
+    # nomImage = nomImage.split(".")[0]
+    # valid = cv.imread("../Validation/labeling/" + nomImage + "/board.png", cv.IMREAD_GRAYSCALE)
+    #
+    # score = validation_comparaison.compare(valid, binaryImage)
+    # global totalpourcent
+    # totalpourcent.append(score * 100)
+    # print(f"Image : {nomImage}")
+    # print("Score : {:.2f}%".format(score * 100))
+    # print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
+    # if score > 0.9:
+    #     return 1
+    # return 0
 
-    score = validation.compare(valid, binaryImage)
-    global totalpourcent
-    totalpourcent.append(score*100)
-    print(f"Image : {nomImage}")
-    print("Score : {:.2f}%".format(score * 100))
-    print(f"Validation {'réussie' if score > 0.9 else 'échouée'}")
-    if score > 0.9:
-        return 1
-    return 0
+    return board, binaryImage
 
 
 def doALL():
@@ -213,6 +216,7 @@ def doALL():
     print("Score total : ", cpt, "/", cptTotal)
     global totalpourcent
     print(totalpourcent)
+
 
 if __name__ == "__main__":
     doALL()

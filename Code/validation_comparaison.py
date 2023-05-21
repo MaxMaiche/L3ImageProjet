@@ -1,13 +1,8 @@
-import numpy as np
-import skimage as ski
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import cv2 as cv
 
 
 def compare(image1, image2):
-
-    #resize
+    # resize
     width1 = image1.shape[1]
     width2 = image2.shape[1]
 
@@ -17,8 +12,6 @@ def compare(image1, image2):
     else:
         dim = (width1, image1.shape[0])
         image2 = cv.resize(image2, dim)
-
-
 
     sumUnion = 0
     sumInter = 0
