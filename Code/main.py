@@ -3,7 +3,7 @@ import os
 import cv2 as cv
 
 import validation_comparaison
-from Code import tableau_detection_lignes, lignes_composantes_connexes
+from Code import tableau_detection_lignes, lignes_composantes_connexes, tableau_composantes_connexes
 from lignes_rlsa import rlsa
 
 validation_threshold = 0.9
@@ -18,8 +18,8 @@ def traitement(nom_image):
     # •===• Obtention du tableau et des lignes •===•
     # Décommenter la ligne correspondant au traitement à tester
 
-    # board, binary_board = tableau_composantes_connexes.get_board(img)
-    board, binary_board, M = tableau_detection_lignes.get_board(nom_image)
+    board, binary_board, M = tableau_composantes_connexes.get_board(nom_image)
+    # board, binary_board, M = tableau_detection_lignes.get_board(nom_image)
 
     lines, binary_lines = lignes_composantes_connexes.get_lines(board, base_image, M)
     # board, binary_board = lignes_rlsa.get_board(img)

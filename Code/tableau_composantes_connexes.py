@@ -16,7 +16,7 @@ def calculEuclidienne(point1, point2):
     return np.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
-def getBoardCC(nomImage):
+def get_board(nomImage):
     image = cv.imread("../Ressources/VALIDATIONNEPASTOUCHER/" + nomImage)
 
     # Resize image
@@ -196,7 +196,7 @@ def getBoardCC(nomImage):
     #     return 1
     # return 0
 
-    return board, binaryImage
+    return board, binaryImage, M
 
 
 def doALL():
@@ -209,7 +209,7 @@ def doALL():
         file_path = os.path.join(folder_path, filename)
         if filename.endswith(allowed_extensions):
             if os.path.exists("../Validation/labeling/" + filename.split(".")[0]):
-                cpt += getBoardCC(filename)
+                cpt += get_board(filename)
                 cptTotal += 1
                 print()
 
