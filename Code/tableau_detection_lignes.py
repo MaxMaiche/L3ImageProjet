@@ -7,7 +7,7 @@ from Code.traitements_basiques import get_edges, get_intersection
 
 
 def get_board(nom_image):
-    base_image = cv.imread("../Ressources/Images/" + nom_image)
+    base_image = cv.imread("../Ressources/VALIDATIONNEPASTOUCHER/" + nom_image)
 
     # Resize image
     width = base_image.shape[1]
@@ -147,7 +147,30 @@ def get_board_lines(img, edges, min_width=650, delta=0.1, tolerance=0.05):
     cv.line(image_result, (line_left[0], line_left[1]), (line_left[2], line_left[3]), (0, 0, 255), 10)
     cv.line(image_result, (line_right[0], line_right[1]), (line_right[2], line_right[3]), (0, 0, 255), 10)
 
+    # Get the corners of the board
+    point_top_left = get_intersection(line_top, line_left)
+    point_top_right = get_intersection(line_top, line_right)
+    point_bottom_left = get_intersection(line_bottom, line_left)
+    point_bottom_right = get_intersection(line_bottom, line_right)
+
+    # Draw the corners on the results image
+    to_int = lambda x: (int(x[0]), int(x[1]))
+    cv.circle(image_result, to_int(point_top_left), 10, (0, 255, 0), -1)
+    cv.circle(image_result, to_int(point_top_right), 10, (0, 255, 0), -1)
+    cv.circle(image_result, to_int(point_bottom_left), 10, (0, 255, 0), -1)
+    cv.circle(image_result, to_int(point_bottom_right), 10, (0, 255, 0), -1)
+
+    base_detected_top_bottom_lines = img.copy()
+    cv.line(base_detected_top_bottom_lines, (line_top[0], line_top[1]), (line_top[2], line_top[3]), (0, 0, 255), 10)
+    cv.line(base_detected_top_bottom_lines, (line_bottom[0], line_bottom[1]), (line_bottom[2], line_bottom[3]), (0, 0, 255), 10)
+
+    base_detected_left_right_lines = base_detected_top_bottom_lines.copy()
+    cv.line(base_detected_left_right_lines, (line_left[0], line_left[1]), (line_left[2], line_left[3]), (255, 0, 0), 10)
+    cv.line(base_detected_left_right_lines, (line_right[0], line_right[1]), (line_right[2], line_right[3]), (255, 0, 0), 10)
+
+    cv.imwrite('Resultats/base_detected_left_right_lines.jpg', base_detected_left_right_lines)
+    cv.imwrite('Resultats/base_detected_top_bottom_lines.jpg', base_detected_top_bottom_lines)
     cv.imwrite('Resultats/base_detected_hough_lines.jpg', image_lines)
-    cv.imwrite('Resultats/base_datectes_board.jpg', image_result)
+    cv.imwrite('Resultats/base_detected_board.jpg', image_result)
 
     return line_top, line_bottom, line_left, line_right

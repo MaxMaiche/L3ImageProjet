@@ -17,7 +17,7 @@ def calculEuclidienne(point1, point2):
 
 
 def getBoardCC(nomImage):
-    image = cv.imread("../Ressources/Images/" + nomImage)
+    image = cv.imread("../Ressources/VALIDATIONNEPASTOUCHER/" + nomImage)
 
     # Resize image
     width = image.shape[1]

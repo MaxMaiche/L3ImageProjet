@@ -57,7 +57,7 @@ def getRlsa(image, horizontal, vertical):
 
 
 def do_all():
-    folder_path = '../Ressources/Images'
+    folder_path = '../Ressources/VALIDATIONNEPASTOUCHER'
     allowed_extensions = '.jpg', '.png', '.jpeg'
     nb_validated_boards = 0
     nb_validated_lines = 0
@@ -91,4 +91,4 @@ def do_one(nom_image):
 
 if __name__ == "__main__":
     do_all()
-    # do_one("0.jpg")
+    # do_one("26.jpg")

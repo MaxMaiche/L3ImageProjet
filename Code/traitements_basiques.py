@@ -38,6 +38,8 @@ def get_edges(gray):
     # Do edge detection
     edges = cv.Canny(gray, 50, 150, apertureSize=3)
 
+    cv.imwrite('./Resultats/base_non_dilated_edges.jpg', edges)
+
     # Closure
     kernel = np.ones((15, 15), np.uint8)
     edges = cv.dilate(edges, kernel, iterations=1)
