@@ -3,7 +3,7 @@ import os
 import cv2 as cv
 
 import validation_comparaison
-from Code import tableau_detection_lignes, lignes_composantes_connexes, tableau_composantes_connexes
+from Code import tableau_detection_lignes, lignes_composantes_connexes, tableau_composantes_connexes, lignes_rlsa
 from lignes_rlsa import rlsa
 
 validation_threshold = 0.9
@@ -13,16 +13,16 @@ pourcentages_lignes = []
 
 
 def traitement(nom_image):
-    base_image = cv.imread("../Ressources/VALIDATIONNEPASTOUCHER/" + nom_image)
+    base_image = cv.imread("../Ressources/Images/" + nom_image)
 
     # •===• Obtention du tableau et des lignes •===•
     # Décommenter la ligne correspondant au traitement à tester
 
-    board, binary_board, M = tableau_composantes_connexes.get_board(nom_image)
-    # board, binary_board, M = tableau_detection_lignes.get_board(nom_image)
+    # board, binary_board, M = tableau_composantes_connexes.get_board(nom_image)
+    board, binary_board, M = tableau_detection_lignes.get_board(nom_image)
 
-    lines, binary_lines = lignes_composantes_connexes.get_lines(board, base_image, M)
-    # board, binary_board = lignes_rlsa.get_board(img)
+    # lines, binary_lines = lignes_composantes_connexes.get_lines(board, base_image, M)
+    lines, binary_lines = lignes_rlsa.get_lines(board, base_image, M)
 
     # •===• Validation •===•
 
@@ -50,14 +50,8 @@ def traitement(nom_image):
     return 1 if score_board > validation_threshold else 0, 1 if score_lines > validation_threshold else 0
 
 
-# TODO : déplacer du main
-def getRlsa(image, horizontal, vertical):
-    newimage = rlsa.rlsa(image, horizontal, vertical)
-    return newimage
-
-
 def do_all():
-    folder_path = '../Ressources/VALIDATIONNEPASTOUCHER'
+    folder_path = '../Ressources/Images'
     allowed_extensions = '.jpg', '.png', '.jpeg'
     nb_validated_boards = 0
     nb_validated_lines = 0
@@ -90,5 +84,5 @@ def do_one(nom_image):
 
 
 if __name__ == "__main__":
-    do_all()
-    # do_one("26.jpg")
+    # do_all()
+    do_one("26.jpg")

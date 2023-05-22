@@ -7,7 +7,7 @@ from Code.traitements_basiques import get_edges, get_intersection
 
 
 def get_board(nom_image):
-    base_image = cv.imread("../Ressources/VALIDATIONNEPASTOUCHER/" + nom_image)
+    base_image = cv.imread("../Ressources/Images/" + nom_image)
 
     # Resize image
     width = base_image.shape[1]
