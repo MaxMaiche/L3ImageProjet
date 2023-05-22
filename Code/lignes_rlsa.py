@@ -1,10 +1,9 @@
 import cv2 as cv
 import numpy as np
 
-from Code.lignes_composantes_connexes import get_composantes_connexes
 
 horizontal = 10
-vertical = 10
+vertical = 0
 
 
 def get_lines(board, base_image, M):
@@ -72,21 +71,42 @@ def rlsa(image, horizontal, vertical):
     # Horizontal RLSA
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            if image[i, j] == 0:
+            if image[i, j] == 255:
                 for k in range(1, horizontal + 1):
                     if j + k < image.shape[1]:
-                        result[i, j + k] = 0
+                        result[i, j + k] = 255
                     if j - k >= 0:
-                        result[i, j - k] = 0
+                        result[i, j - k] = 255
 
     # Vertical RLSA
     for i in range(image.shape[1]):
         for j in range(image.shape[0]):
-            if image[j, i] == 0:
+            if image[j, i] == 255:
                 for k in range(1, vertical + 1):
                     if j + k < image.shape[0]:
-                        result[j + k, i] = 0
+                        result[j + k, i] = 255
                     if j - k >= 0:
-                        result[j - k, i] = 0
+                        result[j - k, i] = 255
 
     return result
+
+
+def get_composantes_connexes(img, img_output, tolerance=0.3):
+    nb_composantes, labels, stats, centroids = cv.connectedComponentsWithStats(img, 8, cv.CV_32S)
+
+    # On affiche les composantes connexes sur l'image d'output
+    for icomposante in range(1, nb_composantes):
+        x, y, w, h, surface = stats[icomposante]
+        if h > tolerance * img.shape[0] or surface < 100:
+            stats[icomposante] = [0, 0, 0, 0, 0]
+            continue
+
+        stats[icomposante] = x, y, w, h, surface
+        x, y, w, h, surface = stats[icomposante]
+        cv.rectangle(img_output, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+    cv.imwrite('Resultats/board_composantes_connexes.jpg', img_output)
+
+    stats = [x for x in stats if x[0] > 0 and x[1] > 0]
+
+    return stats
