@@ -16,7 +16,7 @@ def get_lines(board, base_image, M):
 
     cv.imwrite('Resultats/board_edges.jpg', board_edges)
 
-    image_rlsa = rlsa(board_edges, 10, 10)
+    image_rlsa = rlsa(board_edges, horizontal, vertical)
     cv.imwrite('Resultats/board_rlsa.jpg', image_rlsa)
 
     composantes_connexes = get_composantes_connexes(image_rlsa, board.copy())
